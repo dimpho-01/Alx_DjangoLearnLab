@@ -1,6 +1,7 @@
 ## Python command
 
 ```python
+from bookshelf.models import Book
 deleted_book = Book.objects.get(title = 'Nineteen Eighty-Four')
 deleted_book.delete()
 books = Book.objects.all()
