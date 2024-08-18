@@ -1,0 +1,1 @@
+This is a README.md for the Django models project.
