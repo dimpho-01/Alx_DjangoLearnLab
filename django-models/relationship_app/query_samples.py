@@ -5,8 +5,8 @@ def query_books_by_author(author_id):
     for book in books:
         print(book.title)
 
-def list_books_in_library(library_id):
-    library = Library.objects.get(id=library_id)
+def list_books_in_library(library_name):
+    library = Library.objects.get(name=library_name)
     books = library.books.all()
     for book in books:
         print(book.title)
