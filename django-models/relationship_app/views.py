@@ -7,6 +7,9 @@ from .models import Book
 from .models import Library
 from django.contrib.auth import login
 from django.urls import reverse
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import UserProfile
 
 # Create your views here.
 def list_books(request):
@@ -29,3 +32,27 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'relationship_app/register.html', {'form': form})
+
+def check_admin_role(user):
+    return user.is_authenticated and UserProfile.objects.get(user=user).role == 'Admin'
+
+def check_librarian_role(user):
+    return user.is_authenticated and UserProfile.objects.get(user=user).role == 'Librarian'
+
+def check_member_role(user):
+    return user.is_authenticated and UserProfile.objects.get(user=user).role == 'Member'
+
+@login_required
+@user_passes_test(check_admin_role)
+def admin_view(request):
+    return HttpResponse("Admin View")
+
+@login_required
+@user_passes_test(check_librarian_role)
+def librarian_view(request):
+    return HttpResponse("Librarian View")
+
+@login_required
+@user_passes_test(check_member_role)
+def member_view(request):
+    return HttpResponse("Member View")
