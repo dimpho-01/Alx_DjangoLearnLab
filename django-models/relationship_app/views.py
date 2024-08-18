@@ -45,14 +45,14 @@ def check_member_role(user):
 @login_required
 @user_passes_test(check_admin_role)
 def admin_view(request):
-    return HttpResponse("Admin View")
+    return render(request, 'relationship_app/admin_view.html')
 
 @login_required
 @user_passes_test(check_librarian_role)
 def librarian_view(request):
-    return HttpResponse("Librarian View")
+    return render(request, 'relationship_app/librarian_view.html')
 
 @login_required
 @user_passes_test(check_member_role)
 def member_view(request):
-    return HttpResponse("Member View")
+    return render(request, 'relationship_app/member_view.html')
