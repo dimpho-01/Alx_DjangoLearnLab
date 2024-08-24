@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views import View
 from .models import Book
-from django.forms import ModelForm
+from django .forms import ExampleForm
 
 # Create your views here.
 @permission_required('bookshelf.can_view', raise_exception=True)
@@ -23,12 +23,12 @@ def edit_book(request, book_id):
 @permission_required('bookshelf.can_create', raise_exception=True)
 def create_book(request):
     if request.method == 'POST':
-        form = ModelForm(request.POST)
+        form = ExampleForm(request.POST)
         if form.is_valid():
             form.save()
             # Redirect to a new URL or inform of successful creation
     else:
-        form = ModelForm()
+        form = ExampleForm()
     
     return render(request, 'bookshelf/form_example.html', {'form': form})
 
