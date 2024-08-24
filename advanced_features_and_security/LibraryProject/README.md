@@ -16,3 +16,12 @@ Permissions are enforced using the `@permission_required` decorator for function
 
 ## Testing:
 Test the setup by creating user accounts for each group and attempting to perform actions as per their permissions.
+
+----
+# settings.py
+- Configure security-related settings
+- DEBUG set to False for production to prevent leak of sensitive data
+
+# views.py
+- Demonstrating use of ORM to prevent SQL injection
+- Using Django forms for input validation and sanitation
