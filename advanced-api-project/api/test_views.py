@@ -14,7 +14,7 @@ class BookAPITestCase(APITestCase):
         self.author = Author.objects.create(name='Author Name')
         
     def test_create_book(self):
-        self.client.force_authenticate(user=self.user)  # Ensure the user is logged in for this test
+        self.client.login(username='testuser', password='password')
         url = reverse('book-create')
         data = {
             'title': "Another Test Book",
