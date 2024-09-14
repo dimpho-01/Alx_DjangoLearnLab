@@ -9,10 +9,10 @@
     {% endfor %}
 
     {% if user.is_authenticated %}
-        <form method="post" action="{% url 'comment-create' post.pk %}">
-            {% csrf_token %}
-            {{ comment_form.as_p }}
-            <button type="submit">Add Comment</button>
-        </form>
-    {% endif %}
+<form method="post" action="{% url 'comment-create' post_id=post.id %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit">Post Comment</button>
+</form>
+{% endif %}
 </section>

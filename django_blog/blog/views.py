@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from .models import Post
 from .models import Post, Comment
 from .forms import CommentForm
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 def register(request):
@@ -104,15 +105,15 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/add_comment.html'  # Replace with your template
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        form.instance.post_id = self.kwargs['post_id']
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['post_id'])
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('post-detail', kwargs={'pk': self.kwargs['post_id']})
+        post_id = self.kwargs['post_id']
+        return reverse_lazy('post-detail', kwargs={'pk': post_id})
     
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
