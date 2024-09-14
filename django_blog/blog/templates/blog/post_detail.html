@@ -1,2 +1,18 @@
 <h1>{{ post.title }}</h1>
 <p>{{ post.content }}</p>
+<section id="comments">
+    {% for comment in comments %}
+        <article class="comment">
+            <p>{{ comment.content }}</p>
+            <small>By {{ comment.author }} on {{ comment.created_at }}</small>
+        </article>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'comment-create' post.pk %}">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <button type="submit">Add Comment</button>
+        </form>
+    {% endif %}
+</section>
