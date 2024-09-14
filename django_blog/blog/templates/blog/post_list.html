@@ -1,0 +1,4 @@
+{% for post in posts %}
+  <a href="{% url 'post-detail' post.pk %>">{{ post.title }}</a>
+  <p>{{ post.content|truncatewords:30 }}</p>
+{% endfor %}

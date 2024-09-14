@@ -1,10 +1,10 @@
 {% extends "blog/base.html" %}
 {% block content %}
 <h2>Profile</h2>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <!-- Assume form includes fields for email and optional fields like profile picture or bio -->
-    {{ form.as_p }}
-    <button type="submit">Save changes</button>
+    {{ user_form.as_p }}
+    {{ profile_form.as_p }}
+    <button type="submit">Update</button>
 </form>
 {% endblock %}
