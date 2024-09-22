@@ -1,5 +1,5 @@
-from rest_framework import django_filters as filters
 from .models import Post
+import django_filters as filters
 
 class PostFilter(filters.FilterSet):
     title = filters.CharFilter(lookup_expr='icontains')
