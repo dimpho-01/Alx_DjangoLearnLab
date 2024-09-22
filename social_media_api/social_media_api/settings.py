@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from rest_framework import django_filters as filters
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts.apps.AccountsConfig',
     'rest_framework.authtoken',
+    'posts.apps.PostsConfig'
 ]
 
 MIDDLEWARE = [
@@ -126,3 +128,16 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+class PostFilter(filters.FilterSet):
+    title = filters.CharFilter(lookup_expr='icontains')
+    content = filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
