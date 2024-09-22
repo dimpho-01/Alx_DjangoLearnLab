@@ -43,24 +43,33 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
     
-class FollowUserView(views.APIView):
+CustomUser = get_user_model()
+
+class FollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    
+    def get_queryset(self):
+        # This method explicitly states CustomUser.objects.all()
+        return CustomUser.objects.all()
+    
     def post(self, request, user_id=None):
-        try:
-            user_to_follow = CustomUser.objects.get(id=user_id)
-            UserFollow.objects.create(user_from=request.user, user_to=user_to_follow)
-            return Response(status=status.HTTP_201_CREATED)
-        except CustomUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        user_to_follow = self.get_queryset().get(id=user_id)
+        if user_to_follow == request.user:
+            return Response({'error': "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.following.add(user_to_follow)
+        return Response(status=status.HTTP_201_CREATED)
 
-class UnfollowUserView(views.APIView):
+
+class UnfollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    
+    def get_queryset(self):
+        # This method explicitly states CustomUser.objects.all()
+        return CustomUser.objects.all()
+    
     def post(self, request, user_id=None):
-        try:
-            user_to_unfollow = CustomUser.objects.get(id=user_id)
-            UserFollow.objects.filter(user_from=request.user, user_to=user_to_unfollow).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except CustomUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        user_to_unfollow = self.get_queryset().get(id=user_id)
+        if user_to_unfollow == request.user:
+            return Response({'error': "You cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.following.remove(user_to_unfollow)
+        return Response(status=status.HTTP_204_NO_CONTENT)
