@@ -4,6 +4,7 @@ from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from .serializers import UserRegistrationSerializer, UserSerializer
+from .models import CustomUser, UserFollow
 
 # Create your views here.
 User = get_user_model()
@@ -41,3 +42,25 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+    
+class FollowUserView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id=None):
+        try:
+            user_to_follow = CustomUser.objects.get(id=user_id)
+            UserFollow.objects.create(user_from=request.user, user_to=user_to_follow)
+            return Response(status=status.HTTP_201_CREATED)
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class UnfollowUserView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id=None):
+        try:
+            user_to_unfollow = CustomUser.objects.get(id=user_id)
+            UserFollow.objects.filter(user_from=request.user, user_to=user_to_unfollow).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
