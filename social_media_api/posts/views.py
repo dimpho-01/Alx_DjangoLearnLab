@@ -43,30 +43,36 @@ from rest_framework.response import Response
 from .models import Post, Like
 # Assuming Notification model and logic are implemented and ready to be used
 
+User = get_user_model()
+
 class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def post(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
-        if created:
-            # Create a notification for the post's author
+        post = generics.get_object_or_404(Post, pk=pk)
+        user = request.user
+        if not Like.objects.filter(post=post, user=user).exists():
+            Like.objects.create(post=post, user=user)
             Notification.objects.create(
-                recipient=post.author, 
-                actor=request.user, 
-                verb='liked', 
-                target=post,
+                recipient=post.author,
+                actor=user,
+                verb='liked',
+                target=post
             )
             return Response(status=status.HTTP_201_CREATED)
-        return Response({'message': 'You have already liked this post.'}, status=status.HTTP_409_CONFLICT)
+        else:
+            return Response({'detail': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
 
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def post(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
-        like = Like.objects.filter(user=request.user, post=post)
+        post = generics.get_object_or_404(Post, pk=pk)
+        user = request.user
+        like = Like.objects.filter(post=post, user=user)
         if like.exists():
             like.delete()
+            Notification.objects.filter(recipient=post.author, actor=user, verb='liked', target_id=post.id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({'message': 'You have not liked this post.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'detail': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
