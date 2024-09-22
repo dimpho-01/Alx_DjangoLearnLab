@@ -50,18 +50,17 @@ class LikePostView(generics.GenericAPIView):
 
     def post(self, request, pk=None):
         post = generics.get_object_or_404(Post, pk=pk)
-        user = request.user
-        if not Like.objects.filter(post=post, user=user).exists():
-            Like.objects.create(post=post, user=user)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if created:
             Notification.objects.create(
                 recipient=post.author,
-                actor=user,
+                actor=request.user,
                 verb='liked',
                 target=post
             )
             return Response(status=status.HTTP_201_CREATED)
         else:
-            return Response({'detail': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'You have already liked this post.'}, status=status.HTTP_409_CONFLICT)
 
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
