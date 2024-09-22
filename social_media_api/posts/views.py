@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions, generics, status
 from .models import Post, Comment
@@ -7,6 +7,7 @@ from .filters import PostFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from .models import Post, Like
+from notifications.models import Notification
 
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
@@ -46,18 +47,26 @@ class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, pk=None):
-        post = generics.get_object_or_404(Post, pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
-            # Notification logic here
-            pass
-        return Response(status=status.HTTP_201_CREATED)
+            # Create a notification for the post's author
+            Notification.objects.create(
+                recipient=post.author, 
+                actor=request.user, 
+                verb='liked', 
+                target=post,
+            )
+            return Response(status=status.HTTP_201_CREATED)
+        return Response({'message': 'You have already liked this post.'}, status=status.HTTP_409_CONFLICT)
 
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, pk=None):
-        post = generics.get_object_or_404(Post, pk=pk)
-        Like.objects.filter(user=request.user, post=post).delete()
-        # Delete or update notification logic here
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        post = get_object_or_404(Post, pk=pk)
+        like = Like.objects.filter(user=request.user, post=post)
+        if like.exists():
+            like.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'You have not liked this post.'}, status=status.HTTP_404_NOT_FOUND)
